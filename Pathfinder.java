@@ -1,7 +1,6 @@
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Scanner;
 
 import java.io.FileNotFoundException;
@@ -11,7 +10,7 @@ public class Pathfinder {
     public static final int REGULAR_DISTANCE = 10;
 
     Cell[][] map;
-
+    
     public Pathfinder(String mapPath, int rows, int cols) {
         this.map = new Cell[rows][cols];
         
@@ -19,6 +18,10 @@ public class Pathfinder {
         catch (FileNotFoundException e) { System.out.println("File not found"); }
     }
 
+    /**
+     * @param mapPath map file directory
+     * @return load map
+     */
     private void loadFile(String mapPath) throws FileNotFoundException {
         File map = new File(mapPath);
         Scanner scanner = new Scanner(map);
@@ -41,17 +44,14 @@ public class Pathfinder {
             lineScanner.close();
         }
 
-        /* Prints out everything
-        for (int row = 0; row < this.map.length; row++) {
-            for (int col = 0; col < this.map[row].length; col++) {
-                System.out.print(this.map[row][col].character);
-            }
-            System.out.println("\n");
-        }
-        */
         scanner.close();
     }
 
+    /**
+     * @param start
+     * @param end
+     * @return Finds and calculates the shortest distance between a start cell and end cell
+     */
     public double calculateDistance(int[] start, int[] end) {
         ArrayList<Cell> openSet = new ArrayList<>();
         double distance = 0;
@@ -100,7 +100,7 @@ public class Pathfinder {
                 return distance;
             }
 
-            for (Cell neighborCell : this.getSurroundingCells(currentCell.x, currentCell.y)) {
+            for (Cell neighborCell : this.getSurroundingCells(currentCell)) {
                 int newMovementCost = currentCell.gCost + getDistance(currentCell, neighborCell);
 
                 if (newMovementCost < neighborCell.gCost || !openSet.contains(neighborCell)) {
@@ -118,6 +118,11 @@ public class Pathfinder {
         return distance;
     }
 
+    /**
+     * @param startCell
+     * @param endCell
+     * @return Gives back the shortest path
+     */
     private ArrayList<Cell> retracePath(Cell startCell, Cell endCell) {
         ArrayList<Cell> path = new ArrayList<>();
         Cell currentCell = endCell;
@@ -134,6 +139,11 @@ public class Pathfinder {
         return path;
     }
 
+    /**
+     * @param cellOne
+     * @param cellTwo
+     * @return The distance between cellOne and cellTwo
+     */
     private int getDistance(Cell cellOne, Cell cellTwo) {
         int distX = Math.abs(cellOne.x - cellTwo.x);
         int distY = Math.abs(cellOne.y - cellTwo.y);
@@ -146,13 +156,14 @@ public class Pathfinder {
     }
 
     /**
-     * 
      * @param x
      * @param y
-     * @return
+     * @return ArrayList of the surround cells
      */
-    private ArrayList<Cell> getSurroundingCells(int x, int y) {
-        if (x >= map.length || x < 0 || y >= this.map[0].length || y < 0) return new ArrayList<Cell>();
+    private ArrayList<Cell> getSurroundingCells(Cell cell) {
+
+        int x = cell.x;
+        int y = cell.y;
 
         ArrayList<Cell> surroundingCells = new ArrayList<>();
 
@@ -160,10 +171,10 @@ public class Pathfinder {
             if (x + i != -1 && x + i < this.map.length) {
                 for (int j = -1; j < 2; j++) {
                     if (y + j != -1 && y + j < this.map[0].length) {
-                        Cell cell = this.map[x + i][y + j];
+                        Cell currentCell = this.map[x + i][y + j];
 
-                        if (!(this.map[x][y].equals(cell) || cell.isObstacle || cell.discovered)) {
-                            surroundingCells.add(cell);
+                        if (!(cell.equals(currentCell) || currentCell.isObstacle || currentCell.discovered)) {
+                            surroundingCells.add(currentCell);
                         }
                     }
                 }
